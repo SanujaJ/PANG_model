@@ -7,6 +7,8 @@ classdef analysisBase
         p = [];
         p0 = [20, 0, 0, 9.81, 1.225, 0];
         dampMatr
+
+        dispFlag = true;
     end
 
     properties (SetAccess = {?buildSystem.buildBase})
@@ -276,8 +278,10 @@ classdef analysisBase
         function obj = loadobj(obj)
             addpath([obj.file], '-begin');
             clear persistent
-            clc;
-            fprintf(['...Accessing matrices found in %s\n'], obj.file);
+            if obj.dispFlag
+                clc;
+                fprintf(['...Accessing matrices found in %s\n'], obj.file);
+            end
         end
     end
 end

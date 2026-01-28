@@ -8,8 +8,8 @@ mach_bet = sqrt(1-Minf^2);
 
 %%onera stuff....
 SL = pi;
-lam = 0.275;
-ML = 0.44;
+lam = runObj.lam;
+ML = runObj.ML;
 sigM = -0.25*pi;
 sigL = 2*pi; 
 sM = -0.5890;

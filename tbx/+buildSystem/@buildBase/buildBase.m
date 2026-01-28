@@ -25,6 +25,7 @@ classdef buildBase
     methods
 
         function par = get.par(obj)
+            par_all = [];
             par_idx = 1;
             
             for i=1:length(obj.elas)

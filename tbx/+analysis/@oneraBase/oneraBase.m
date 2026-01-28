@@ -6,10 +6,15 @@ classdef oneraBase<analysis.analysisBase
     end
 
     properties
-        Cl_grad = 2*pi
-        Cm0 = 0
-        Cm_grad = 0
-        Cd0 = 0;
+        Cl_grad = @(alp, U)(2*pi*ones(size(alp)));
+        Cl = @(alp, U)(2*pi*alp);
+        Cm = @(alp, U)(zeros(size(alp)));
+        Cm_grad = @(alp, U)(zeros(size(alp)))
+        Cd = @(alp, U)(zeros(size(alp)));
+
+        %%onera stuff....
+        lam = 0.275;
+        ML = 0.44;
     end
 
     %this is temporarily hidden.. until the option for propegation eqn
@@ -92,18 +97,23 @@ classdef oneraBase<analysis.analysisBase
         %% aero coeffs...
 
         function [Cf, Cf_alp] = Cl_fcn(obj, vz, U_tot)
-            Cf = obj.Cl_grad*(vz./U_tot + obj.geom.twist(obj.basis.xColloc(:)));
-            Cf_alp = obj.Cl_grad*ones(size(vz));
+            Cf = obj.Cl(vz./U_tot + obj.geom.twist(obj.basis.xColloc(:)),...
+                U_tot);
+            Cf_alp = obj.Cl_grad(vz./U_tot + obj.geom.twist(obj.basis.xColloc(:)),...
+                U_tot);
         end
 
         function [Cf, Cf_alp] = Cd_fcn(obj, vz, U_tot)
-            Cf = obj.Cd0+0*(vz./U_tot + obj.geom.twist(obj.basis.xColloc(:)));
+            Cf = obj.Cd(vz./U_tot + obj.geom.twist(obj.basis.xColloc(:)),...
+                U_tot);
             Cf_alp = 0*ones(size(vz));
         end
 
         function [Cf, Cf_alp] = Cm_fcn(obj, vz, U_tot)
-            Cf = obj.Cm0 + obj.Cm_grad*(vz./U_tot + obj.geom.twist(obj.basis.xColloc(:)));
-            Cf_alp = obj.Cm_grad*ones(size(vz));
+            Cf = obj.Cm(vz./U_tot + obj.geom.twist(obj.basis.xColloc(:)),...
+                U_tot);
+            Cf_alp = obj.Cm_grad(vz./U_tot + obj.geom.twist(obj.basis.xColloc(:)),...
+                U_tot);
         end
 
     end

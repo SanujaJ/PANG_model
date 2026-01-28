@@ -236,7 +236,7 @@ for odr=1:3%min([3,length(trms)])
     writeFunction(F{odr}, odr, [fPath,'\+odr_',num2str(odr),'\'], 'Lif_proj2', [])
 end
 
-% 
+%
 % F_sym = evalMatr_K(F,Q)'*sym(dx);
 % F_sym = simplify(F_sym);
 % F = matlabFunction(F_sym, 'File','AeroEqns\Lif_proj2','vars', {Q,U,alp});
@@ -391,42 +391,51 @@ end
 % end
 
 %sweep version
-for i=1:N_gam
-    for j=1:N_gam
+if beta~=0
+    for i=1:N_gam
+        for j=1:N_gam
 
-        swpFct1 = (1-sin(beta))./(cos(beta));
+            swpFct1 = (1-sin(beta))./(cos(beta));
 
-        %sweep - left wing
-        dx1 = (xTrail(j)+xGrid(i))*cos(beta);
-        dy = (xTrail(j)-xGrid(i))*sin(beta);
-        dr = sqrt(dx1^2+dy^2);
-        sB = (dy./dr);
-        cB = dx1./dr;
-        swpFct2 = (1-sB)./cos(beta);
+            %sweep - left wing
+            dx1 = (xTrail(j)+xGrid(i))*cos(beta);
+            dy = (xTrail(j)-xGrid(i))*sin(beta);
+            dr = sqrt(dx1^2+dy^2);
+            sB = (dy./dr);
+            cB = dx1./dr;
+            swpFct2 = (1-sB)./cos(beta);
 
-        %2nd effect
-        cs1=cB*cos(beta)+sB*sin(beta);
+            %2nd effect
+            cs1=cB*cos(beta)+sB*sin(beta);
 
-        f_ind(i,j) = (0.25/pi)*(swpFct1./(xTrail(j)-xGrid(i)) + swpFct2./(xTrail(j)+xGrid(i)));
+            f_ind(i,j) = (0.25/pi)*(swpFct1./(xTrail(j)-xGrid(i)) + swpFct2./(xTrail(j)+xGrid(i)));
 
-        %...
-        %sweep - left wing
-        if j>1
-            dx2 = (xTrail(j-1)+xGrid(i))*cos(beta);
-            dy = (xTrail(j-1)-xGrid(i))*sin(beta);
-        else
-            dx2 = (0+xGrid(i))*cos(beta);
-            dy = (0-xGrid(i))*sin(beta);
+            %...
+            %sweep - left wing
+            if j>1
+                dx2 = (xTrail(j-1)+xGrid(i))*cos(beta);
+                dy = (xTrail(j-1)-xGrid(i))*sin(beta);
+            else
+                dx2 = (0+xGrid(i))*cos(beta);
+                dy = (0-xGrid(i))*sin(beta);
+            end
+            dr = sqrt(dx2^2+dy^2);
+            sB = (dy./dr);
+            cB = dx2./dr;
+
+            %2nd effect
+            cs2=-cB*cos(beta)-sB*sin(beta);
+            dp = sin(2*beta)*xGrid(i);
+
+            f_ind2(i,j) = (0.25/pi)*(cs1+cs2)./dp;
         end
-        dr = sqrt(dx2^2+dy^2);
-        sB = (dy./dr);
-        cB = dx2./dr;
-
-        %2nd effect
-        cs2=-cB*cos(beta)-sB*sin(beta);
-        dp = sin(2*beta)*xGrid(i);
-
-        f_ind2(i,j) = (0.25/pi)*(cs1+cs2)./dp;
+    end
+else
+    f_ind2 = 0;
+    for i=1:N_gam
+        for j=1:N_gam
+            f_ind(i,j) = (0.25/pi)*(1./(xTrail(j)-xGrid(i)) + 1./(xTrail(j)+xGrid(i)));
+        end
     end
 end
 
@@ -440,24 +449,24 @@ writeFunction(dx, 1, ['+project\+aero\+geom\'], 'dx_fcn', [])
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     function outVec = evalMatr_K(matr, q)
-    sz = size(matr{1}); N = sz(2);
-    for J=1:length(xGrid)
-        for I=1:N
-            subElem{1}(J,I) = matr{2}(1,:,J,I)*q +...
-                q'*matr{3}(:,:,J,I)*q;
+        sz = size(matr{1}); N = sz(2);
+        for J=1:length(xGrid)
+            for I=1:N
+                subElem{1}(J,I) = matr{2}(1,:,J,I)*q +...
+                    q'*matr{3}(:,:,J,I)*q;
+            end
         end
-    end
-    outVec = (subElem{1} + matr{1});
+        outVec = (subElem{1} + matr{1});
     end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% function to output selected columns from pre-integrated matrices...
     function out = dimDelim(mat, dim)
-    if length(dim)==1
-        out = mat(1:N_tot,dim);
-    end
-    if length(dim)==3
-        out = mat(1:N_tot,dim);
-    end
+        if length(dim)==1
+            out = mat(1:N_tot,dim);
+        end
+        if length(dim)==3
+            out = mat(1:N_tot,dim);
+        end
     end
 end
